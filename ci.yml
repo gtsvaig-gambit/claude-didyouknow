@@ -1,0 +1,25 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: syntax check
+        run: for f in cli.js lib/*.js audit.js; do node --check "$f"; done
+      - name: dependency audit
+        run: npm install --package-lock-only && npm audit
+      - name: install into a scratch home
+        run: |
+          mkdir -p /tmp/scratch/.claude
+          HOME=/tmp/scratch node cli.js install
+      - name: adversarial security harness
+        run: |
+          HOME=/tmp/scratch node audit.js | tee /tmp/out.txt
+          # only the documented baseCommand finding is permitted
+          test "$(grep -c 'VULNERABLE' /tmp/out.txt)" = "1"
+          grep -q 'E1' /tmp/out.txt
+      - name: uninstall cleanly
+        run: HOME=/tmp/scratch node cli.js uninstall

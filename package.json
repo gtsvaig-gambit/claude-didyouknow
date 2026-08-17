@@ -1,0 +1,38 @@
+{
+  "name": "claude-didyouknow",
+  "version": "1.1.0",
+  "description": "Task-relevant trivia in the Claude Code status line while the agent works",
+  "bin": {
+    "didyouknow": "cli.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "cli.js",
+    "lib/",
+    "audit.js",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "statusline",
+    "hooks"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "audit": "node audit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/you/claude-didyouknow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/you/claude-didyouknow/issues"
+  },
+  "homepage": "https://github.com/you/claude-didyouknow#readme"
+}

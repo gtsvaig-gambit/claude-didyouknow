@@ -1,0 +1,6 @@
+# npx runs cli.js via its shebang. A CRLF line ending turns "#!/usr/bin/env node"
+# into "node\r", which fails with "bad interpreter". Force LF on every text file.
+* text=auto eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
