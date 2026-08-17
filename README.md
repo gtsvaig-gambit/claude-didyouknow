@@ -24,7 +24,7 @@ Pin to a tag so you get a reviewed revision rather than whatever is on the
 default branch right now:
 
 ```bash
-npx github:you/claude-didyouknow#v1.2.0
+npx github:you/claude-didyouknow#v1.3.0
 ```
 
 Requires Node 18+ and `git` on PATH.

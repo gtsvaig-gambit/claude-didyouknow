@@ -123,6 +123,9 @@ function install() {
     ok(`kept your existing status line as the top row`);
   }
   config.secondsPerFact = config.secondsPerFact || 12;
+  if (typeof config.prefix !== 'string') config.prefix = 'did you know?';
+  config.labelColor = config.labelColor || '1;33';
+  config.factColor = config.factColor || '0';
   config.model = config.model || 'haiku';
   config.minPromptLength = config.minPromptLength || 15;
   S.writeFileAtomic(CONFIG, JSON.stringify(config, null, 2), 0o600);

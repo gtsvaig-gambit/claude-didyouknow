@@ -22,6 +22,12 @@ const DIM = '\x1b[2m';
 const CYAN = '\x1b[36m';
 const RESET = '\x1b[0m';
 
+// Config-driven SGR, but only digits and semicolons -- never arbitrary escapes.
+function sgr(spec, fallback) {
+  const v = typeof spec === 'string' && /^[0-9;]{1,16}$/.test(spec) ? spec : fallback;
+  return `\x1b[${v}m`;
+}
+
 const raw = S.readStdin();
 const d = S.parseJson(raw, {});
 const cfg = S.readJsonFile(CONFIG, {});
@@ -82,10 +88,23 @@ const idx = Math.floor(Date.now() / 1000 / per) % pool.length;
 let fact = S.sanitizeText(pool[idx]);
 if (!fact) process.exit(0);
 
+// Sanitised the same way as the fact: the label is config-driven text.
+const label = S.sanitizeText(
+  typeof cfg.prefix === 'string' ? cfg.prefix : 'did you know?',
+  40
+);
+const labelColor = sgr(cfg.labelColor, '1;33'); // bold yellow
+const factColor = sgr(cfg.factColor, '0');      // default weight, not dim
+
 // Claude Code sets COLUMNS; terminal-width detection can't see the tty here.
 const cols = parseInt(process.env.COLUMNS, 10);
-const width = (Number.isFinite(cols) && cols > 0 ? cols : 80) - 6;
+const total = (Number.isFinite(cols) && cols > 0 ? cols : 80) - 4;
+// Budget against the label's *visible* width; ANSI codes occupy no columns.
+const width = total - (label ? label.length + 1 : 0);
 if (width < 20) process.exit(0);
 if (fact.length > width) fact = fact.slice(0, width - 1) + '…';
 
-process.stdout.write(`${DIM}✦ ${fact}${RESET}\n`);
+const rendered = label
+  ? `${labelColor}${label}${RESET} ${factColor}${fact}${RESET}`
+  : `${factColor}${fact}${RESET}`;
+process.stdout.write(rendered + '\n');
