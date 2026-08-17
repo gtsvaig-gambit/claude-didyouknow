@@ -4,7 +4,21 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const S = require('./lib/safe');
+let S;
+try {
+  S = require('./safe');
+} catch (e) {
+  console.error(`
+Cannot load safe.js -- this package is incomplete.
+
+Expected these files next to cli.js:
+  safe.js  statusline.js  hook.js  generate.js
+
+If you assembled the repo by hand, make sure all of them are committed at the
+repository root (not in a subdirectory).
+`);
+  process.exit(1);
+}
 
 const HOME = os.homedir();
 const CLAUDE = path.join(HOME, '.claude');
@@ -69,6 +83,15 @@ function isOurs(cmd) {
 function install() {
   console.log(`\n${c.b('didyouknow')} ${c.d('· installing')}\n`);
 
+  // Verify the package is complete before mutating anything. A half-shipped
+  // package must not leave settings.json pointing at files that do not exist.
+  const missing = RUNTIME.filter((f) => !fs.existsSync(path.join(__dirname, f)));
+  if (missing.length) {
+    fail(`package incomplete, missing: ${missing.join(', ')}`);
+    console.log(`\n  All runtime files must sit next to cli.js at the repository root.\n`);
+    process.exit(1);
+  }
+
   // Owner-only: cached fact sets reveal what you have been working on, and a
   // writable dir would let another local user swap out the runtime scripts.
   S.mkdirSecure(ROOT);
@@ -76,11 +99,7 @@ function install() {
   S.mkdirSecure(path.join(ROOT, 'cache'));
 
   for (const f of RUNTIME) {
-    const src = path.join(__dirname, 'lib', f);
-    if (!fs.existsSync(src)) {
-      fail(`missing runtime file ${f} -- package is incomplete`);
-      process.exit(1);
-    }
+    const src = path.join(__dirname, f);
     const dst = path.join(BIN, f);
     fs.copyFileSync(src, dst);
     try { fs.chmodSync(dst, 0o700); } catch {}
