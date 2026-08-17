@@ -1,36 +1,63 @@
-# claude-didyouknow
+# claude-didyouknow — task-relevant trivia in the Claude Code status line
 
-Task-relevant trivia in the Claude Code status line while the agent works.
+[![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node 18+](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![macOS · Linux · Windows](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#install)
+[![Claude Code](https://img.shields.io/badge/for-Claude%20Code-orange.svg)](https://docs.claude.com/en/docs/claude-code)
+
+**A Claude Code add-on that fills dead waiting time with "did you know" facts about
+whatever you just asked the agent to build — rendered in a custom `statusLine`, without
+ever touching Claude's context window.**
+
+Claude Code trivia · custom status line · hooks · zero context cost · one Haiku call per task.
 
 ```
 [Opus] todoapp | 23% ctx
-✦ Kanban was designed for Toyota supply chains, not software.
+✦ Did you know — Kanban was designed for Toyota supply chains, not software.
 ```
+
+When Claude spends ninety seconds running a test suite, the terminal is doing nothing and so
+are you. `claude-didyouknow` hooks `UserPromptSubmit`, generates a batch of facts about your
+actual task in a detached background process, and streams them into the Claude Code status
+line one at a time until the agent stops.
 
 ## Install
 
 ```bash
-npx github:you/claude-didyouknow
+npx github:gtsvaig-gambit/claude-didyouknow
 ```
 
 That's it. Restart Claude Code and ask it to build something.
 
 ```bash
-npx github:you/claude-didyouknow doctor      # diagnose
-npx github:you/claude-didyouknow uninstall   # clean removal, restores your old status line
+npx github:gtsvaig-gambit/claude-didyouknow doctor      # diagnose
+npx github:gtsvaig-gambit/claude-didyouknow uninstall   # clean removal, restores your old status line
 ```
 
 Pin to a tag so you get a reviewed revision rather than whatever is on the
 default branch right now:
 
 ```bash
-npx github:you/claude-didyouknow#v1.3.0
+npx github:gtsvaig-gambit/claude-didyouknow#v1.3.0
 ```
 
 Requires Node 18+ and `git` on PATH.
 
 No `jq`, no `chmod`, no GNU `timeout`, no shell scripts. Node only, so it works on
 macOS, Linux, and Windows.
+
+## Why you might want it
+
+- **Zero context cost.** Facts render straight to your terminal. Nothing is ever fed back
+  into Claude's context window, so the agent's reasoning and token budget are untouched.
+- **Task-relevant, not generic.** Facts are generated from the prompt you just submitted —
+  ask for a Kubernetes operator and you get Kubernetes history, not fortune-cookie filler.
+- **Cheap.** One Haiku call per novel task fingerprint, ~350 output tokens. Repeats are free.
+- **Non-destructive install.** Backs up `~/.claude/settings.json`, appends to existing hook
+  arrays instead of replacing them, and keeps your current status line as the top row.
+- **Idempotent.** Run the installer twice and you get one set of hooks, not two.
+- **Reversible.** `uninstall` restores what was there before.
+- **Auditable.** A security harness ships in the package; run it against a throwaway `$HOME`.
 
 ## What it touches
 
@@ -96,7 +123,7 @@ One Haiku call per novel task fingerprint, ~350 output tokens. Repeats are free.
 status line itself costs nothing — it's a local process, ~40ms, well inside Claude
 Code's 300ms debounce.
 
-## Why this isn't a plugin
+## Why this isn't a `/plugin install` plugin
 
 A Claude Code plugin can ship hooks, but a plugin's `settings.json` supports only the
 `agent` and `subagentStatusLine` keys — `statusLine` can only come from user or project
@@ -119,7 +146,7 @@ The security harness ships with the package. Run it against a throwaway home:
 
 ```bash
 mkdir -p /tmp/dyk-audit/.claude
-HOME=/tmp/dyk-audit npx github:you/claude-didyouknow
+HOME=/tmp/dyk-audit npx github:gtsvaig-gambit/claude-didyouknow
 HOME=/tmp/dyk-audit node "$(npm root -g)/claude-didyouknow/audit.js"
 ```
 
@@ -131,4 +158,40 @@ Expect 14 blocked checks and one finding — `E1`, the documented and accepted
 It refuses to run against your real home directory, because it creates canary
 files and deletes `$HOME/IMPORTANT.txt`.
 
-MIT.
+## FAQ
+
+**How do I customize the Claude Code status line?**
+Claude Code reads a `statusLine` command from `~/.claude/settings.json` and renders its
+stdout under the prompt. This project installs one for you (and preserves any command you
+already had as the first row), so you don't have to write the JSON by hand.
+
+**Does it slow Claude Code down or use up my context window?**
+No. Fact generation runs in a detached process and the output goes to your terminal, never
+back into the conversation. The status line process itself takes about 40ms per refresh.
+
+**Which Claude Code hooks does it use?**
+`UserPromptSubmit` to kick off generation, plus `Stop` and session cleanup hooks to make
+the fact row disappear when the agent finishes. Existing hooks in your settings are kept.
+
+**Does it work on Windows?**
+Yes. Everything is Node — no shell scripts, no `jq`, no `chmod`, no GNU `timeout`.
+
+**How much does it cost to run?**
+One Claude Haiku call (~350 output tokens) the first time you ask for a given kind of task.
+Identical tasks hit the cache and cost nothing.
+
+**How do I remove it?**
+`npx github:gtsvaig-gambit/claude-didyouknow uninstall` — it restores the backed-up
+settings and your previous status line.
+
+## Keywords
+
+Claude Code, claude-code, Anthropic Claude, Claude Code status line, statusline, custom
+status line, Claude Code hooks, UserPromptSubmit hook, Stop hook, Claude Code add-on,
+Claude Code extension, Claude Code plugin alternative, AI coding assistant, agentic coding,
+agent status line, developer productivity, terminal trivia, did you know facts, CLI tool,
+npx installer, Node.js, Claude Haiku, macOS, Linux, Windows.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

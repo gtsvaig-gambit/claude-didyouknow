@@ -23,8 +23,20 @@
   "keywords": [
     "claude",
     "claude-code",
+    "claude-code-plugin",
+    "claude-code-hooks",
     "statusline",
-    "hooks"
+    "status-line",
+    "hooks",
+    "anthropic",
+    "ai-coding-assistant",
+    "agentic-coding",
+    "developer-tools",
+    "cli",
+    "terminal",
+    "trivia",
+    "did-you-know",
+    "productivity"
   ],
   "license": "MIT",
   "scripts": {
@@ -32,10 +44,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/you/claude-didyouknow.git"
+    "url": "git+https://github.com/gtsvaig-gambit/claude-didyouknow.git"
   },
   "bugs": {
-    "url": "https://github.com/you/claude-didyouknow/issues"
+    "url": "https://github.com/gtsvaig-gambit/claude-didyouknow/issues"
   },
-  "homepage": "https://github.com/you/claude-didyouknow#readme"
+  "homepage": "https://github.com/gtsvaig-gambit/claude-didyouknow#readme"
 }

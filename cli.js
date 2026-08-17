@@ -159,7 +159,7 @@ function install() {
 
   console.log(`\n${c.b('Done.')} Restart Claude Code, then ask it to build something.\n`);
   console.log(c.d('  configure   ~/.claude/didyouknow/config.json'));
-  const self = process.env.DYK_INVOKED_AS || 'npx github:you/claude-didyouknow';
+  const self = process.env.DYK_INVOKED_AS || 'npx github:gtsvaig-gambit/claude-didyouknow';
   console.log(c.d(`  diagnose    ${self} doctor`));
   console.log(c.d(`  remove      ${self} uninstall\n`));
 }
