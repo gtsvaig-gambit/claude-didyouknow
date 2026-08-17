@@ -60,8 +60,15 @@ const sid = S.safeSessionId(d.session_id);
 if (!sid) process.exit(0);
 if (!fs.existsSync(path.join(ROOT, `${sid}.working`))) process.exit(0);
 
-const facts = S.readJsonFile(path.join(ROOT, `${sid}.facts.json`), null);
-if (!Array.isArray(facts) || facts.length === 0) process.exit(0);
+// Accepts both the current {topic, facts} shape and bare arrays written by
+// older versions, so an existing cache doesn't silently stop rendering.
+const stored = S.readJsonFile(path.join(ROOT, `${sid}.facts.json`), null);
+const facts = Array.isArray(stored)
+  ? stored
+  : stored && Array.isArray(stored.facts)
+    ? stored.facts
+    : null;
+if (!facts || facts.length === 0) process.exit(0);
 
 const per = Number.isFinite(cfg.secondsPerFact) && cfg.secondsPerFact > 0
   ? Math.min(3600, Math.floor(cfg.secondsPerFact))

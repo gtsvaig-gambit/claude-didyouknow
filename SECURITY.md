@@ -36,6 +36,25 @@ render time. A cache file written by an older version cannot bypass it.
 Bidi control characters (U+202A–U+202E, U+2066–U+2069) are stripped too, so
 fact text cannot reorder its own rendering.
 
+## Prompt is data, not instruction
+
+The generator shows the user's prompt to a model in order to classify its
+subject domain. An earlier version concatenated instructions then the prompt,
+which made the model answer the prompt instead of classifying it -- an
+unintentional instruction/data confusion with the same shape as prompt
+injection. Now the instructions live in `--system-prompt`, the prompt is fenced
+in `<specimen>` tags and labelled as data, and the instruction is restated after
+the fence.
+
+The generator also runs with `--tools ""` from a neutral working directory. It
+previously inherited the session's cwd, so `claude -p` loaded the project's
+`CLAUDE.md` and settings and reasoned about the user's repository on every
+prompt. Trivia generation needs no repository access.
+
+Escape-sequence stripping matters more here than it looks: a model can emit
+valid JSON containing `\u001b`, which parses into a real ESC byte. That path is
+tested in `audit.js` and neutralised at both write and render time.
+
 ## Accepted risk: `config.json` `baseCommand`
 
 `baseCommand` runs through a shell. This is deliberate: a Claude Code
